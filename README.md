@@ -1,24 +1,29 @@
 # vue-vuetify-filters
 
-## Project setup
+## Настройка проекта
+
 ```
 npm install
 ```
 
-### Compiles and hot-reloads for development
+### Компиляция и горячая перезагрузка для разработки
+
 ```
 npm run serve
 ```
 
-### Compiles and minifies for production
+### Компиляция и минификация для продакшн
+
 ```
 npm run build
 ```
 
-### Lints and fixes files
+### Линтинг и исправление файлов
+
 ```
 npm run lint
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### Настройка конфигурации
+
+Посмотрите [Configuration Reference](https://cli.vuejs.org/config/).
