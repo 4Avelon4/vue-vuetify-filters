@@ -1,15 +1,11 @@
 <template>
   <v-app>
-    <home-view />
+    <router-view />
   </v-app>
 </template>
 
 <script>
-import HomeView from '@/views/HomeView.vue';
-
 export default {
-  components: {
-    HomeView
-  }
+  name: 'DefaultLayout',
 };
 </script>
