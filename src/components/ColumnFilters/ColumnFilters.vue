@@ -1,10 +1,11 @@
 <template>
   <v-col>
     <v-row class="filter-header" align="center">
-      <span class="filter-title">Фильтры</span>
+      <span v-if="!isCollapsed" class="filter-title">Фильтры</span>
 
       <div class="filter-field">
         <v-btn
+          v-if="!isCollapsed"  
           class="filter-clear"
           icon
           @click="clearFilters"
@@ -12,7 +13,10 @@
           <v-img src="@/assets/eraser.png" width="24" height="24" />
         </v-btn>
 
-        <v-btn icon @click="toggleFilters">
+        <v-btn
+          icon
+          @click="toggleFilters"
+        >
           <v-icon>{{ filterToggleIcon }}</v-icon>
         </v-btn>
       </div>
@@ -69,14 +73,11 @@ export default {
   computed: {
     customerItems() {
       const allCustomers = ['Все', ...this.customers];
-
       return allCustomers;
     },
 
     filterToggleIcon() {
-      const icon = this.isCollapsed ? 'mdi-chevron-left' : 'mdi-chevron-right';
-
-      return icon;
+      return this.isCollapsed ? 'mdi-chevron-right' : 'mdi-chevron-left';
     },
 
     filters() {
@@ -104,6 +105,7 @@ export default {
 
     toggleFilters() {
       this.isCollapsed = !this.isCollapsed;
+      this.$emit('update-collapse', this.isCollapsed);
     }
   }
 };
@@ -121,19 +123,10 @@ export default {
   display: flex;
   flex-direction: column;
   width: 100%;
-
-  @media only screen and (max-width: 960px) {
-    flex-direction: row;
-  }
-
-  @media only screen and (max-width: 756px) {
-    flex-direction: column;
-  }
 }
 
 .filter-title {
   margin-left: 10px;
-
   font-weight: bold;
 }
 
@@ -141,15 +134,4 @@ export default {
   margin-right: 15px;
 }
 
-@media only screen and (max-width: 960px) {
-  .filter-field:not(:last-child) {
-    margin-right: 20px;
-  }
-}
-
-@media only screen and (max-width: 756px) {
-  .filter-field:not(:last-child) {
-    margin-right: 0;
-  }
-}
 </style>

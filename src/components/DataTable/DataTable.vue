@@ -1,20 +1,22 @@
 <template>
-  <v-data-table
-    :headers="headers"
-    :items="filteredItems"
-    item-value="ids"
-    class="elevation-1"
-  >
-    <template v-slot:item="props">
-      <tr>
-        <td>{{ props.item.ids }}</td>
-        <td>{{ props.item.registrationDate }}</td>
-        <td>{{ props.item.cardId }}</td>
-        <td>{{ props.item.patient }}</td>
-        <td>{{ props.item.customer }}</td>
-      </tr>
-    </template>
-  </v-data-table>
+  <div class="data-table-wrapper">
+    <v-data-table
+      :headers="headers"
+      :items="filteredItems"
+      item-value="ids"
+      class="elevation-1 data-table--sm"
+    >
+      <template v-slot:item="props">
+        <tr :style="getRowStyle(props.index)">
+          <td>{{ props.item.ids }}</td>
+          <td>{{ props.item.registrationDate }}</td>
+          <td>{{ props.item.cardId }}</td>
+          <td>{{ props.item.patient }}</td>
+          <td>{{ props.item.customer }}</td>
+        </tr>
+      </template>
+    </v-data-table>
+  </div>
 </template>
 
 <script>
@@ -47,6 +49,7 @@ export default {
         { ids: '22032902', registrationDate: '2022-03-29T16:18', cardId: 45, patient: 'Геккель Эрнст (Лаб)', customer: 'Nefrologia' },
         { ids: '22021401', registrationDate: '2022-02-14T19:16', cardId: 48, patient: 'Марля Анатомий (Лаб)', customer: 'Osp. Fatebenefratelli' },
       ],
+      lightColors: ['#FFEB3B', '#C8E6C9', '#FFCDD2', '#9AC7FA'],
     };
   },
   computed: {
@@ -136,8 +139,31 @@ export default {
 
     formatDayOrMonth(value) {
       return String(value).padStart(2, '0');
-    }
-  }
+    },
 
+    getRowStyle(index) {
+      const isRowHighlighted = index % 3 === 0;
+
+      if (!isRowHighlighted) return {};
+
+      const colorIndex = Math.floor((index / 3) % this.lightColors.length);
+
+      return {
+        backgroundColor: this.lightColors[colorIndex]
+      };
+    },
+  }
 };
 </script>
+
+<style scoped>
+.data-table-wrapper {
+  width: 100%;
+}
+
+@media only screen and (max-width: 756px) {
+  .data-table--sm {
+    overflow-x: scroll;
+  }
+}
+</style>

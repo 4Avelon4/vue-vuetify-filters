@@ -130,10 +130,6 @@ export default {
       };
     },
 
-    closeDatePicker() {
-      this.showDatePicker = null;
-    },
-
     onDateBlur(type) {
       const dateString = this[`${type}DateString`];
 
@@ -144,6 +140,10 @@ export default {
       if (!formattedDate) return;
 
       this[`${type}Date`] = formattedDate;
+    },
+
+    closeDatePicker() {
+      this.showDatePicker = null;
     },
 
     onStartDateBlur() {

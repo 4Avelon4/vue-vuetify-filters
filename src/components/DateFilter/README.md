@@ -34,6 +34,7 @@
 - **formatDate**: Форматирует объект даты в строку с использованием локали `ru-RU`.
 - **toggleDatePicker**: Открывает или закрывает календарь для выбора даты начала или конца.
 - **setDatePickerPosition**: Устанавливает позицию календаря в зависимости от положения поля ввода.
+- **onDateBlur**: Обрабатывает событие потери фокуса в полях ввода для начала и конца диапазона дат.
 - **closeDatePicker**: Закрывает календарь.
 - **onStartDateBlur**: Обработчик события потери фокуса для поля даты начала.
 - **onEndDateBlur**: Обработчик события потери фокуса для поля даты конца.
@@ -50,15 +51,15 @@
 
 ```vue
 <template>
-  <DateFilterComponent @update-filters="updateFilters" />
+  <DateFilter @update-filters="updateFilters" />
 </template>
 
 <script>
-import DateFilterComponent from "./components/DateFilterComponent.vue";
+import DateFilter from "./components/DateFilter.vue";
 
 export default {
   components: {
-    DateFilterComponent,
+    DateFilter,
   },
   data() {
     return {
