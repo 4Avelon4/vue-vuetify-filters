@@ -1,7 +1,7 @@
 <template>
   <div class="data-table-wrapper">
     <v-data-table
-      v-if="filteredItems.length > 0"
+      v-if="hasFilteredItems"
       :headers="headers"
       :items="filteredItems"
       :items-per-page="-1"
@@ -66,6 +66,8 @@ const filteredItems = computed(() => {
 
   return filteredItems;
 });
+
+const hasFilteredItems = computed(() => filteredItems.value.length > 0);
 
 // Methods
 const isItemValid = (item, startDate, endDate, ids, patientName, customer) => {

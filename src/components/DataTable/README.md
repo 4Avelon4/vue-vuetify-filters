@@ -32,6 +32,7 @@
 ### `computed`
 
 - **filteredItems**: отфильтрованные данные, соответствующие выбранным фильтрам.
+- **hasFilteredItems**: проверяет, есть ли элементы в списке filteredItems.
 
 ### `methods`
 
