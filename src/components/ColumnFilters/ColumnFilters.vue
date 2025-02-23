@@ -3,14 +3,14 @@
     <v-row class="filter-header" align="center">
       <span v-if="!isCollapsed" class="filter-title">Фильтры</span>
 
-      <div class="filter-field">
+      <div class="filter-control">
         <v-btn
           v-if="!isCollapsed"  
           class="filter-clear"
           icon
           @click="clearFilters"
         >
-          <v-img src="@/assets/eraser.png" width="24" height="24" />
+          <v-img src="@/assets/image/eraser.png" width="24" height="24" />
         </v-btn>
 
         <v-btn
@@ -29,14 +29,14 @@
             v-model="ids"
             label="IDS"
             class="filter-field"
-            @input="applyFilters"
+            @input="updateFilters"
           />
 
           <v-text-field
             v-model="patientName"
             label="Фамилия пациента"
             class="filter-field"
-            @input="applyFilters"
+            @input="updateFilters"
           />
 
           <v-select
@@ -44,7 +44,7 @@
             label="Заказчик"
             :items="customerItems"
             class="filter-field"
-            @update:modelValue="applyFilters"
+            @update:modelValue="updateFilters"
           />
         </div>
       </v-row>
@@ -52,71 +52,92 @@
   </v-col>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      ids: '',
-      patientName: '',
-      customer: 'Все',
-      isCollapsed: false,
-      customers: [
-        'Cardiologia',
-        'Chirurgia',
-        'Gastroenterologia',
-        'Medicina',
-        'Nefrologia',
-        'Osp. Fatebenefratelli'
-      ]
-    };
-  },
-  computed: {
-    customerItems() {
-      const allCustomers = ['Все', ...this.customers];
-      return allCustomers;
-    },
+<script setup>
+// Vue
+import { ref, computed } from 'vue';
 
-    filterToggleIcon() {
-      return this.isCollapsed ? 'mdi-chevron-right' : 'mdi-chevron-left';
-    },
+// Composable
+import useResponsive from '@/composables/useResponsive';
 
-    filters() {
-      const isCustomerAllSelected = this.customer === 'Все';
-      const customerFilter = !isCustomerAllSelected ? this.customer : null;
+// Emits
+const emit = defineEmits(['update-filters', 'update-collapse']);
 
-      return {
-        ids: this.ids,
-        patientName: this.patientName,
-        customer: customerFilter,
-      };
-    }
-  },
-  methods: {
-    applyFilters() {
-      this.$emit('update-filters', this.filters);
-    },
+const { isSmallScreen } = useResponsive();
 
-    clearFilters() {
-      this.ids = '';
-      this.patientName = '';
-      this.customer = 'Все';
-      this.applyFilters();
-    },
+// Refs and Reactive Variables
+const ids = ref('');
+const patientName = ref('');
+const customer = ref('Все');
+const isCollapsed = ref(false);
 
-    toggleFilters() {
-      this.isCollapsed = !this.isCollapsed;
-      this.$emit('update-collapse', this.isCollapsed);
-    }
-  }
+const customers = [
+  'Cardiologia',
+  'Chirurgia',
+  'Gastroenterologia',
+  'Medicina',
+  'Nefrologia',
+  'Osp. Fatebenefratelli'
+];
+
+// Computed properties
+const customerItems = computed(() => {
+  const allCustomers = ['Все', ...customers];
+
+  return allCustomers;
+});
+
+const filterToggleIcon = computed(() => {
+  if (isSmallScreen.value) return isCollapsed.value ? 'mdi-chevron-up' : 'mdi-chevron-down';
+
+  return isCollapsed.value ? 'mdi-chevron-right' : 'mdi-chevron-left';
+});
+
+const filters = computed(() => {
+  const isCustomerAllSelected = customer.value === 'Все';
+  const customerFilter = !isCustomerAllSelected ? customer.value : null;
+
+  return {
+    ids: ids.value,
+    patientName: patientName.value,
+    customer: customerFilter,
+  };
+});
+
+// Methods
+const updateFilters = () => {
+  emit('update-filters', filters.value);
+};
+
+const clearFilters = () => {
+  ids.value = '';
+  patientName.value = '';
+  customer.value = 'Все';
+
+  updateFilters();
+};
+
+const toggleFilters = () => {
+  isCollapsed.value = !isCollapsed.value;
+  emit('update-collapse', isCollapsed.value);
 };
 </script>
 
 <style scoped>
 .filter-header {
   display: flex;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 20px;
+}
+
+.filter-control {
+  display: flex;
+  flex-wrap: nowrap;
+
+  @media only screen and (max-width: 960px) {
+    margin-left: auto;
+  }
 }
 
 .filter-info {
@@ -127,6 +148,8 @@ export default {
 
 .filter-title {
   margin-left: 10px;
+  margin-right: 20px;
+
   font-weight: bold;
 }
 

@@ -4,7 +4,7 @@
 
     <v-row class="data-info">
       <v-col 
-        :style="getColumnMaxWidth()" 
+        :style="getColumnMaxWidth" 
         class="column-filter__wrapper"
       >
         <column-filters 
@@ -14,77 +14,81 @@
         />
       </v-col>
 
-      <v-col>
-        <data-table :filters="filters" />
+      <v-col class="data-table__col">
+        <data-table v-if="hasFilters" :filters="filters" />
+        <div
+          v-else
+          class="table-empty"
+        >
+          Таблица пустая, примените фильтры для отображения данных.
+        </div>
       </v-col>
     </v-row>
   </v-container>
 </template>
 
-<script>
+<script setup>
+// Vue
+import { ref, computed } from 'vue';
+
+// Components
 import DateFilter from '@/components/DateFilter/DateFilter.vue';
 import ColumnFilters from '@/components/ColumnFilters/ColumnFilters.vue';
 import DataTable from '@/components/DataTable/DataTable.vue';
 
-export default {
-  components: {
-    DateFilter,
-    ColumnFilters,
-    DataTable
-  },
-  data() {
-    return {
-      filters: {
-        dateFrom: null,
-        dateTo: null,
-        ids: '',
-        patientName: '',
-        customer: ''
-      },
-      isCollapsed: false,
-      isSmallScreen: false
-    };
-  },
-  mounted() {
-    this.checkScreenSize();
-    window.addEventListener('resize', this.checkScreenSize);
-  },
-  unmounted() {
-    window.removeEventListener('resize', this.checkScreenSize);
-  },
-  methods: {
-    getColumnMaxWidth() {
-      if (this.isCollapsed) return 'max-width: 70px;';
+// Composables
+import useResponsive from '@/composables/useResponsive';
 
-      const maxWidth = this.isSmallScreen ? 'max-width: 100%;' : 'max-width: 30%;';
+const { isSmallScreen } = useResponsive();
 
-      return maxWidth;
-    },
-    updateFilters(newFilters) {
-      this.filters = { ...this.filters, ...newFilters };
-    },
-    updateCollapse(newState) {
-      this.isCollapsed = newState;
-    },
-    checkScreenSize() {
-      this.isSmallScreen = window.innerWidth <= 960;
-    }
-  }
+// Refs and Reactive Variables
+const filters = ref({
+  dateFrom: null,
+  dateTo: null,
+  ids: '',
+  patientName: '',
+  customer: ''
+});
+
+const isCollapsed = ref(false);
+
+// Computed properties
+const hasFilters = computed(() => {
+  const { dateFrom, dateTo, ids, patientName, customer } = filters.value;
+  const hasActiveFilters = dateFrom || dateTo || ids || patientName || customer;
+  
+  return hasActiveFilters;
+});
+
+const getColumnMaxWidth = computed(() => {
+  if (isCollapsed.value) return isSmallScreen.value ? 'max-width: 100%' : 'max-width: 70px;';
+
+  return isSmallScreen.value ? 'max-width: 100%' : 'max-width: 27%';
+});
+
+// Methods
+const updateFilters = (newFilters) => {
+  filters.value = { ...filters.value, ...newFilters };
+};
+
+const updateCollapse = (newState) => {
+  isCollapsed.value = newState;
 };
 </script>
 
 <style scoped>
 .column-filter__wrapper {
-  transition: max-width 0.7s;
+  transition: max-width .3s;
+}
+
+.data-table__col {
+  position: relative;
 }
 
 @media only screen and (max-width: 960px) {
   .data-info {
+    display: flex;
     flex-direction: column;
-  }
-
-  .column-filter__wrapper {
-    transition: none;
   }
 }
 </style>

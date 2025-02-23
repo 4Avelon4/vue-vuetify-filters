@@ -55,153 +55,157 @@
     <v-col cols="12" lg="2" md="12" class="button-container">
       <v-btn
         class="filter-submit-btn"
-        @click="applyFilters"
+        @click="updateFilters"
       >Выбрать</v-btn>
 
       <v-btn @click="clearFilters" icon>
-        <v-img src="@/assets/eraser.png" width="24" height="24" />
+        <v-img src="@/assets/image/eraser.png" width="24" height="24" />
       </v-btn>
     </v-col>
   </v-row>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      startDate: null,
-      endDate: null,
-      showDatePicker: null,
-      datepickerPosition: {},
-      datepickerPositionEnd: {},
-    };
-  },
-  computed: {
-    formattedStartDate() {
-      return this.formatDate(this.startDate);
-    },
-    formattedEndDate() {
-      return this.formatDate(this.endDate);
-    },
-    datePickerIcon() {
-      const datePickerIconClass = this.showDatePicker ? 'mdi-chevron-up' : 'mdi-chevron-down';
+<script setup>
+// Vue
+import { ref, computed, nextTick } from 'vue';
 
-      return datePickerIconClass;
-    },
-    showStartDatePicker() {
-      return this.showDatePicker === 'start';
-    },
-    showEndDatePicker() {
-      return this.showDatePicker === 'end';
-    }
-  },
-  methods: {
-    formatDate(date) {
-      const isValidDate = date instanceof Date;
+// Emits
+const emit = defineEmits(['update-filters']);
 
-      if (!isValidDate) return '';
+// Refs and Reactive Variables
+const startDate = ref(null);
+const endDate = ref(null);
+const showDatePicker = ref(null);
+const datepickerPosition = ref({});
+const datepickerPositionEnd = ref({});
 
-      return date.toLocaleDateString('ru-RU');
-    },
+const startDateInput = ref(null);
+const endDateInput = ref(null);
 
-    toggleDatePicker(type) {
-      if (this.showDatePicker === type) {
-        this.showDatePicker = null;
+// Computed properties
+const formattedStartDate = computed(() => formatDate(startDate.value));
+const formattedEndDate = computed(() => formatDate(endDate.value));
 
-        return;
-      }
+const datePickerIcon = computed(() => {
+  const datePickerIconClass = showDatePicker.value ? 'mdi-chevron-up' : 'mdi-chevron-down';
 
-      this.showDatePicker = type;
+  return datePickerIconClass;
+});
 
-      const isStartDatePicker = type === 'start';
-      const positionVar = isStartDatePicker ? 'datepickerPosition' : 'datepickerPositionEnd';
-      this.setDatePickerPosition(`${type}DateInput`, positionVar);
-    },
+const showStartDatePicker = computed(() => showDatePicker.value === 'start');
+const showEndDatePicker = computed(() => showDatePicker.value === 'end');
 
-    setDatePickerPosition(inputRef, positionVar) {
-      const inputElement = this.$refs[inputRef];
-      const rect = inputElement.getBoundingClientRect();
+// Methods
+const formatDate = (date) => {
+  const isValidDate = date instanceof Date;
 
-      this[positionVar] = {
-        ...this[positionVar],
-        top: `${rect.bottom + window.scrollY}px`,
-        left: `${rect.left + window.scrollX}px`,
-        width: `${rect.width}px`
-      };
-    },
+  if (!isValidDate) return '';
 
-    onDateBlur(type) {
-      const dateString = this[`${type}DateString`];
+  return date.toLocaleDateString('ru-RU');
+};
 
-      if (!dateString) return;
+const toggleDatePicker = (type) => {
+  if (showDatePicker.value === type) {
+    showDatePicker.value = null;
 
-      const formattedDate = this.formatDateFromInput(dateString);
+    return;
+  }
 
-      if (!formattedDate) return;
+  showDatePicker.value = type;
 
-      this[`${type}Date`] = formattedDate;
-    },
+  const isStartDatePicker = type === 'start';
+  const positionVar = isStartDatePicker ? 'datepickerPosition' : 'datepickerPositionEnd';
 
-    closeDatePicker() {
-      this.showDatePicker = null;
-    },
+  nextTick(() => setDatePickerPosition(type, positionVar));
+};
 
-    onStartDateBlur() {
-      const newStartDate = this.formatDateFromInput(this.startDateString);
+const getElementPosition = (element) => {
+  const rect = element.getBoundingClientRect();
 
-      if (!newStartDate) return;
+  return {
+    top: `${rect.bottom + window.scrollY}px`,
+    left: `${rect.left + window.scrollX}px`,
+    width: `${rect.width}px`
+  };
+};
 
-      this.startDate = newStartDate;
-    },
+const updateDatePickerPosition = (positionVar, position) => {
+  if (positionVar === 'datepickerPosition') {
+    datepickerPosition.value = position;
 
-    onEndDateBlur() {
-      const newEndDate = this.formatDateFromInput(this.endDateString);
+    return;
+  }
 
-      if (!newEndDate) return;
+  datepickerPositionEnd.value = position;
+};
 
-      this.endDate = newEndDate;
-    },
+const setDatePickerPosition = (type, positionVar) => {
+  const inputElement = type === 'start' ? startDateInput.value : endDateInput.value;
 
-    formatDateFromInput(inputValue) {
-      const val = !inputValue || typeof inputValue !== 'string';
-      
-      if (val) return null;
+  if (inputElement) {
+    const position = getElementPosition(inputElement);
 
-      const dateParts = inputValue.split('.');
+    updateDatePickerPosition(positionVar, position);
+  }
+};
 
-      if (dateParts.length !== 3) return null;
+const closeDatePicker = () => {
+  showDatePicker.value = null;
+};
 
-      const [day, month, year] = dateParts.map(num => parseInt(num, 10));
+const onStartDateBlur = () => {
+  const newStartDate = formatDateFromInput(startDate.value);
 
-      const formattedDate = new Date(year, month - 1, day);
+  if (!newStartDate) return;
+  
+  startDate.value = newStartDate;
+};
 
-      return formattedDate;
-    },
+const onEndDateBlur = () => {
+  const newEndDate = formatDateFromInput(endDate.value);
 
-    onDateChange() {
-      this.$emit('update-filters', {
-        dateFrom: this.startDate,
-        dateTo: this.endDate,
-      });
-    },
+  if (!newEndDate) return;
 
-    applyFilters() {
-      this.$emit('update-filters', {
-        dateFrom: this.startDate,
-        dateTo: this.endDate,
-      });
-    },
+  endDate.value = newEndDate;
+};
 
-    clearFilters() {
-      this.startDate = null;
-      this.endDate = null;
-      
-      this.$emit('update-filters', {
-        dateFrom: this.startDate,
-        dateTo: this.endDate,
-      });
-    },
-  },
+const formatDateFromInput = (inputValue) => {
+  const val = !inputValue || typeof inputValue !== 'string';
+
+  if (val) return null;
+
+  const dateParts = inputValue.split('.');
+
+  if (dateParts.length !== 3) return null;
+
+  const [day, month, year] = dateParts.map(num => parseInt(num, 10));
+  const formattedDate = new Date(year, month - 1, day);
+
+  return formattedDate;
+};
+
+const onDateChange = () => {
+  emit('update-filters', {
+    dateFrom: startDate.value,
+    dateTo: endDate.value,
+  });
+};
+
+const updateFilters = () => {
+  emit('update-filters', {
+    dateFrom: startDate.value,
+    dateTo: endDate.value,
+  });
+};
+
+const clearFilters = () => {
+  startDate.value = null;
+  endDate.value = null;
+
+  emit('update-filters', {
+    dateFrom: startDate.value,
+    dateTo: endDate.value,
+  });
 };
 </script>
 
